@@ -71,11 +71,10 @@ class OTABackend(Protocol):
         """查询设备组的更新历史。"""
 ```
 
-**DeploymentStatus** 数据类：
+**DeploymentStatus** 数据模型（Pydantic，与其他 pet-* 仓库一致）：
 
 ```python
-@dataclass(frozen=True)
-class DeploymentStatus:
+class DeploymentStatus(BaseModel, frozen=True):
     deployment_id: str
     version: str
     device_group: str
@@ -133,7 +132,7 @@ device_groups/
 | 文件 | 输入 | 输出 | 职责 |
 |------|------|------|------|
 | `make_delta.py` | 旧版 tarball + 新版 tarball | delta patch 文件 | bsdiff4 差分，记录 from_version → to_version |
-| `upload_artifact.py` | tarball 路径 + version | artifact_id | 调 `pet_quantize.packaging.verify_package` 校验签名后上传到 backend |
+| `upload_artifact.py` | release_dir（含 tarball + manifest.json）+ version | artifact_id | 调 `pet_quantize.packaging.verify_package(release_dir)` 校验签名完整性后上传到 backend |
 | `create_deployment.py` | artifact_id + device_group | deployment_id | 调 backend.create_deployment，不硬编码设备 ID |
 
 ### 4.2 release/
@@ -200,7 +199,7 @@ release:
   canary_percentage: 5
   canary_observe_hours: 48
   rollback_timeout_minutes: 5
-  failure_rate_threshold: 0.10
+  failure_rate_threshold: 0.10    # 灰度/全量阶段的失败率门槛（同时用于告警）
 
 gate_overrides:
   eval_passed: true
@@ -216,20 +215,36 @@ packaging:
 
 monitoring:
   poll_interval_seconds: 30
-  alert_failure_threshold: 0.10
+  device_pending_timeout_minutes: 30  # 设备超时：超过此时间仍为 pending 视为失败
 
 device_groups:
   canary: "device_groups/canary.json"
   production: "device_groups/production.json"
-
-wandb:
-  project: "pet-ota"
-  entity: ""
 ```
 
 ---
 
-## 9. 与 DEVELOPMENT_GUIDE 的偏差
+## 9. 状态持久化与进程恢复
+
+- `canary_rollout` 每次状态变更都写入 `deployments/<version>.json`
+- 进程重启后，`canary_rollout` 读取最新 deployment JSON 恢复状态，从当前阶段继续
+- 设备 pending 超时：超过 `monitoring.device_pending_timeout_minutes` 仍为 pending 的设备标记为 failed
+
+---
+
+## 10. 依赖
+
+```
+bsdiff4          # 差分打包
+pydantic>=2.0    # 配置 / 数据模型
+tenacity         # 重试
+pyyaml           # params.yaml
+pet-quantize     # verify_package（签名校验）
+```
+
+---
+
+## 11. 与 DEVELOPMENT_GUIDE 的偏差
 
 | DEVELOPMENT_GUIDE | 实际设计 | 原因 |
 |---|---|---|
