@@ -6,11 +6,11 @@ import hashlib
 import json
 from pathlib import Path
 
-import structlog
+from pet_infra.logging import get_logger
 
 from pet_ota.backend.base import OTABackend
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 def _verify_manifest(release_dir: str) -> None:
@@ -38,7 +38,7 @@ def _verify_manifest(release_dir: str) -> None:
             msg = f"SHA256 mismatch for {filename}: expected {expected_sha}, got {actual_sha}"
             raise ValueError(msg)
 
-    logger.info("manifest_verified", release_dir=release_dir)
+    logger.info("manifest_verified", extra={"release_dir": release_dir})
 
 
 def upload_artifact(
@@ -72,9 +72,9 @@ def upload_artifact(
             if not result.integrity_ok:
                 msg = f"Package integrity check failed: {result}"
                 raise ValueError(msg)
-            logger.info("signature_verified", release_dir=release_dir)
+            logger.info("signature_verified", extra={"release_dir": release_dir})
         except ImportError:
-            logger.warning("pet_quantize not available, skipping signature verification")
+            logger.warning("pet_quantize not available, skipping signature verification", extra={})
 
     tarballs = glob.glob(str(Path(release_dir) / "*.tar.gz"))
     if not tarballs:
@@ -82,5 +82,5 @@ def upload_artifact(
         raise FileNotFoundError(msg)
 
     artifact_id = backend.upload_artifact(tarballs[0], version)
-    logger.info("artifact_uploaded", artifact_id=artifact_id, version=version)
+    logger.info("artifact_uploaded", extra={"artifact_id": artifact_id, "version": version})
     return artifact_id

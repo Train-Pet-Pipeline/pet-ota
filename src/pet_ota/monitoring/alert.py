@@ -1,11 +1,11 @@
 """Failure rate alerting via structured CRITICAL logging."""
 from __future__ import annotations
 
-import structlog
+from pet_infra.logging import get_logger
 
 from pet_ota.monitoring.check_update_rate import UpdateRateResult
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 def check_and_alert(result: UpdateRateResult, threshold: float) -> bool:
@@ -21,11 +21,13 @@ def check_and_alert(result: UpdateRateResult, threshold: float) -> bool:
     if result.failure_rate >= threshold:
         logger.critical(
             "deployment_failure_rate_exceeded",
-            deployment_id=result.deployment_id,
-            failure_rate=result.failure_rate,
-            threshold=threshold,
-            failure_count=result.failure_count,
-            total_devices=result.total_devices,
+            extra={
+                "deployment_id": result.deployment_id,
+                "failure_rate": result.failure_rate,
+                "threshold": threshold,
+                "failure_count": result.failure_count,
+                "total_devices": result.total_devices,
+            },
         )
         return True
     return False

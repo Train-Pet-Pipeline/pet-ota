@@ -5,7 +5,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-import structlog
+from pet_infra.logging import get_logger
 from pydantic import BaseModel
 
 from pet_ota.backend.base import OTABackend
@@ -17,7 +17,7 @@ from pet_ota.packaging.upload_artifact import upload_artifact
 from pet_ota.release.check_gate import check_gate
 from pet_ota.release.rollback import rollback
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 _RESUMABLE_STATES = {
     "canary_deploying",
@@ -74,21 +74,21 @@ def canary_rollout(
     resume_state = _check_resume(backend, canary_dep_id, full_dep_id)
 
     if resume_state == "canary_observing":
-        logger.info("rollout_resume", state="canary_observing", version=version)
+        logger.info("rollout_resume", extra={"state": "canary_observing", "version": version})
         return _observe_and_continue(
             version, canary_dep_id, full_dep_id, params, backend, device_simulator,
         )
     if resume_state == "full_deploying":
-        logger.info("rollout_resume", state="full_deploying", version=version)
+        logger.info("rollout_resume", extra={"state": "full_deploying", "version": version})
         return _full_deploy_and_finish(
             version, canary_dep_id, full_dep_id, params, backend, device_simulator,
         )
 
     # --- GATE_CHECK ---
-    logger.info("rollout_state", state="gate_check", version=version)
+    logger.info("rollout_state", extra={"state": "gate_check", "version": version})
     passed, gate_failures = check_gate(params_path)
     if not passed:
-        logger.info("rollout_gate_failed", failures=gate_failures)
+        logger.info("rollout_gate_failed", extra={"failures": gate_failures})
         return RolloutResult(
             version=version, final_status="failed",
             gate_failures=gate_failures,
@@ -102,7 +102,7 @@ def canary_rollout(
     )
 
     # --- CANARY_DEPLOYING ---
-    logger.info("rollout_state", state="canary_deploying", version=version)
+    logger.info("rollout_state", extra={"state": "canary_deploying", "version": version})
     canary_dep_id = create_deployment(
         artifact_id=artifact_id, device_group="canary",
         name=canary_dep_id, backend=backend,
@@ -144,7 +144,7 @@ def _observe_and_continue(
     device_simulator: Callable[[OTABackend, str], None] | None,
 ) -> RolloutResult:
     """Run canary observation phase, then continue to full deploy."""
-    logger.info("rollout_state", state="canary_observing", version=version)
+    logger.info("rollout_state", extra={"state": "canary_observing", "version": version})
     backend.update_deployment_status(canary_dep_id, "canary_observing")
 
     observe_seconds = params.release.canary_observe_hours * 3600
@@ -176,7 +176,7 @@ def _full_deploy_and_finish(
     device_simulator: Callable[[OTABackend, str], None] | None,
 ) -> RolloutResult:
     """Deploy to production and finish."""
-    logger.info("rollout_state", state="full_deploying", version=version)
+    logger.info("rollout_state", extra={"state": "full_deploying", "version": version})
     failure_threshold = params.release.failure_rate_threshold
 
     try:
@@ -200,7 +200,7 @@ def _full_deploy_and_finish(
         )
 
     backend.update_deployment_status(full_dep_id, "done")
-    logger.info("rollout_state", state="done", version=version)
+    logger.info("rollout_state", extra={"state": "done", "version": version})
     return RolloutResult(
         version=version, final_status="done", gate_failures=[],
         canary_deployment_id=canary_dep_id, full_deployment_id=full_dep_id,
@@ -212,7 +212,9 @@ def _do_rollback(
     backend: OTABackend, reason: str,
 ) -> RolloutResult:
     """Execute rollback and return appropriate result."""
-    logger.info("rollout_state", state="rolling_back", version=version, reason=reason)
+    logger.info(
+        "rollout_state", extra={"state": "rolling_back", "version": version, "reason": reason}
+    )
     try:
         rollback(dep_id, backend, reason)
         return RolloutResult(

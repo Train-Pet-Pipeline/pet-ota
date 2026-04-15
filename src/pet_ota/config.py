@@ -1,12 +1,11 @@
 """Pydantic params loader and structured JSON logging setup."""
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import Any
 
-import structlog
 import yaml
+from pet_infra.logging import get_logger
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -86,19 +85,6 @@ def load_params(path: str | Path = "params.yaml") -> OTAParams:
 def setup_logging() -> None:
     """Configure structured JSON logging (idempotent).
 
-    Sets up structlog with JSON rendering. Safe to call multiple times.
+    Sets up pet_infra JSON logging. Safe to call multiple times.
     """
-    structlog.configure(
-        processors=[
-            structlog.contextvars.merge_contextvars,
-            structlog.processors.add_log_level,
-            structlog.processors.StackInfoRenderer(),
-            structlog.dev.set_exc_info,
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.JSONRenderer(),
-        ],
-        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
-        context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
+    get_logger("pet-ota")
