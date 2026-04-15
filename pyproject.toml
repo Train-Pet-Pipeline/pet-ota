@@ -11,7 +11,7 @@ dependencies = [
     "pydantic>=2.0",
     "pyyaml>=6.0",
     "tenacity",
-    "structlog",
+    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -37,12 +37,13 @@ target-version = "py311"
 select = ["E", "F", "I", "N", "W", "UP"]
 
 [tool.mypy]
+disable_error_code = ["import-untyped"]
 python_version = "3.11"
 strict = true
 warn_return_any = true
 
 [[tool.mypy.overrides]]
-module = ["bsdiff4", "pet_quantize.*"]
+module = ["bsdiff4", "pet_quantize.*", "yaml"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

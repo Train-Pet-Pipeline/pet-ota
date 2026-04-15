@@ -1,11 +1,11 @@
 """Rollback — abort current deployment and restore previous version."""
 from __future__ import annotations
 
-import structlog
+from pet_infra.logging import get_logger
 
 from pet_ota.backend.base import OTABackend
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 def rollback(
@@ -25,8 +25,7 @@ def rollback(
     """
     logger.info(
         "rollback_start",
-        deployment_id=current_deployment_id,
-        reason=reason,
+        extra={"deployment_id": current_deployment_id, "reason": reason},
     )
     try:
         backend.abort_deployment(current_deployment_id)
@@ -34,11 +33,10 @@ def rollback(
         backend.update_deployment_metadata(
             current_deployment_id, {"rollback_reason": reason}
         )
-        logger.info("rollback_complete", deployment_id=current_deployment_id)
+        logger.info("rollback_complete", extra={"deployment_id": current_deployment_id})
     except Exception:
         logger.critical(
             "rollback_failed",
-            deployment_id=current_deployment_id,
-            reason=reason,
+            extra={"deployment_id": current_deployment_id, "reason": reason},
         )
         raise

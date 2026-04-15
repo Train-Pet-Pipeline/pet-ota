@@ -1,12 +1,12 @@
 """Check deployment update rates — success, failure, pending."""
 from __future__ import annotations
 
-import structlog
+from pet_infra.logging import get_logger
 from pydantic import BaseModel
 
 from pet_ota.backend.base import OTABackend
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 class UpdateRateResult(BaseModel, frozen=True):
@@ -49,9 +49,11 @@ def check_update_rate(
     )
     logger.info(
         "update_rate_checked",
-        deployment_id=deployment_id,
-        success_rate=result.success_rate,
-        failure_rate=result.failure_rate,
-        pending_rate=result.pending_rate,
+        extra={
+            "deployment_id": deployment_id,
+            "success_rate": result.success_rate,
+            "failure_rate": result.failure_rate,
+            "pending_rate": result.pending_rate,
+        },
     )
     return result

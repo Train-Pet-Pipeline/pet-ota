@@ -7,11 +7,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import structlog
+from pet_infra.logging import get_logger
 
 from pet_ota.backend.base import DeploymentStatus
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 class LocalBackend:
@@ -48,7 +48,9 @@ class LocalBackend:
         dest_dir.mkdir(parents=True, exist_ok=True)
         src = Path(artifact_path)
         shutil.copy2(src, dest_dir / src.name)
-        logger.info("artifact_uploaded", version=version, path=str(dest_dir / src.name))
+        logger.info(
+            "artifact_uploaded", extra={"version": version, "path": str(dest_dir / src.name)}
+        )
         return version
 
     def list_device_groups(self) -> list[str]:
@@ -100,7 +102,9 @@ class LocalBackend:
         }
         dep_file = self._deployments / f"{name}.json"
         dep_file.write_text(json.dumps(data, indent=2))
-        logger.info("deployment_created", deployment_id=name, device_group=device_group)
+        logger.info(
+            "deployment_created", extra={"deployment_id": name, "device_group": device_group}
+        )
         return name
 
     def get_deployment_status(self, deployment_id: str) -> DeploymentStatus:
@@ -141,7 +145,7 @@ class LocalBackend:
             deployment_id: The deployment to abort.
         """
         self.update_deployment_status(deployment_id, "rolling_back")
-        logger.info("deployment_aborted", deployment_id=deployment_id)
+        logger.info("deployment_aborted", extra={"deployment_id": deployment_id})
 
     def update_deployment_status(self, deployment_id: str, status: str) -> None:
         """Update the status field in a deployment JSON file.

@@ -1,11 +1,11 @@
 """Release gate — 5 pre-release checks read from params.yaml gate_overrides."""
 from __future__ import annotations
 
-import structlog
+from pet_infra.logging import get_logger
 
 from pet_ota.config import load_params
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 def check_gate(params_path: str = "params.yaml") -> tuple[bool, list[str]]:
@@ -47,5 +47,5 @@ def check_gate(params_path: str = "params.yaml") -> tuple[bool, list[str]]:
         failures.append("canary_group_ready: canary group is not ready")
 
     passed = len(failures) == 0
-    logger.info("gate_check_complete", passed=passed, failures=failures)
+    logger.info("gate_check_complete", extra={"passed": passed, "failures": failures})
     return passed, failures
