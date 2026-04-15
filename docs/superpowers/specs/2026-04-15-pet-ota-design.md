@@ -78,7 +78,11 @@ class DeploymentStatus(BaseModel, frozen=True):
     deployment_id: str
     version: str
     device_group: str
-    status: str  # "deploying" | "observing" | "done" | "aborted"
+    status: Literal[
+        "gate_check", "canary_deploying", "canary_observing",
+        "full_deploying", "done", "failed",
+        "rolling_back", "rolled_back", "rollback_failed",
+    ]
     total_devices: int
     success_count: int
     failure_count: int
@@ -139,7 +143,7 @@ device_groups/
 
 | 文件 | 职责 |
 |------|------|
-| `check_gate.py` | 5 项门控检查：eval_passed, dpo_pairs ≥ 500, days_since_last_release ≥ 7, open_p0_bugs == 0, canary_group_ready。v1 从 params.yaml 的 `gate_overrides` 读值。返回 `(passed: bool, failures: list[str])` |
+| `check_gate.py` | 5 项门控检查：eval_passed, dpo_pairs ≥ 500, days_since_last_release ≥ 7, open_p0_bugs == 0, canary_group_ready。v1 从 params.yaml 的 `gate_overrides` 读值。返回 `tuple[bool, list[str]]`（passed, failures） |
 | `canary_rollout.py` | 灰度发布状态机（见第 5 节）。编排完整发布流程 |
 | `rollback.py` | 终止当前部署 + 将设备组回退到上一个成功版本。记录回滚原因到 deployment JSON |
 
@@ -159,7 +163,8 @@ GATE_CHECK → CANARY_DEPLOYING → CANARY_OBSERVING → FULL_DEPLOYING → DONE
      ↓              ↓                  ↓                  ↓
    FAILED      ROLLING_BACK      ROLLING_BACK        ROLLING_BACK
                     ↓                  ↓                  ↓
-                 ROLLED_BACK       ROLLED_BACK        ROLLED_BACK
+               ROLLED_BACK /     ROLLED_BACK /      ROLLED_BACK /
+               ROLLBACK_FAILED   ROLLBACK_FAILED    ROLLBACK_FAILED
 ```
 
 - **GATE_CHECK**: 调 check_gate，任一项失败 → FAILED（不创建部署）
@@ -235,11 +240,12 @@ device_groups:
 ## 10. 依赖
 
 ```
-bsdiff4          # 差分打包
-pydantic>=2.0    # 配置 / 数据模型
-tenacity         # 重试
-pyyaml           # params.yaml
-pet-quantize     # verify_package（签名校验）
+bsdiff4>=1.2.0,<2.0  # 差分打包
+pydantic>=2.0        # 配置 / 数据模型
+tenacity             # 重试
+pyyaml               # params.yaml
+structlog            # 结构化 JSON 日志
+pet-quantize         # verify_package（签名校验）
 ```
 
 ---
