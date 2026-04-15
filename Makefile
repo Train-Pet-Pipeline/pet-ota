@@ -3,7 +3,7 @@
 .PHONY: setup test release
 
 setup:
-	pip install -e ".[dev]"
+	python -m pip install -e ".[dev]"
 
 test:
 	pytest tests/ -v
