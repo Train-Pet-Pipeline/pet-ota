@@ -3,10 +3,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import structlog
+from pet_infra.logging import get_logger
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(1), reraise=True)
@@ -32,9 +32,7 @@ def make_delta(old_tarball: str, new_tarball: str, output_path: str) -> str:
 
     logger.info(
         "make_delta_start",
-        old_size=len(old_bytes),
-        new_size=len(new_bytes),
-        output_path=output_path,
+        extra={"old_size": len(old_bytes), "new_size": len(new_bytes), "output_path": output_path},
     )
 
     patch_bytes = bsdiff4.diff(old_bytes, new_bytes)
@@ -44,7 +42,6 @@ def make_delta(old_tarball: str, new_tarball: str, output_path: str) -> str:
 
     logger.info(
         "make_delta_done",
-        patch_size=len(patch_bytes),
-        output_path=output_path,
+        extra={"patch_size": len(patch_bytes), "output_path": output_path},
     )
     return output_path

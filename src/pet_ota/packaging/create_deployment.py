@@ -1,11 +1,11 @@
 """Create a deployment targeting a device group."""
 from __future__ import annotations
 
-import structlog
+from pet_infra.logging import get_logger
 
 from pet_ota.backend.base import OTABackend
 
-logger = structlog.get_logger()
+logger = get_logger("pet-ota")
 
 
 def create_deployment(
@@ -28,8 +28,6 @@ def create_deployment(
     dep_id = backend.create_deployment(artifact_id, device_group, name)
     logger.info(
         "deployment_requested",
-        deployment_id=dep_id,
-        artifact_id=artifact_id,
-        device_group=device_group,
+        extra={"deployment_id": dep_id, "artifact_id": artifact_id, "device_group": device_group},
     )
     return dep_id

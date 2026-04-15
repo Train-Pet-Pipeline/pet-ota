@@ -11,7 +11,7 @@ dependencies = [
     "pydantic>=2.0",
     "pyyaml>=6.0",
     "tenacity",
-    "structlog",
+    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v1.0.0",
 ]
 
 [project.optional-dependencies]
