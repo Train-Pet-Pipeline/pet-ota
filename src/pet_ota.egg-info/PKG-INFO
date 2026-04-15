@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: pet-ota
+Version: 1.0.0
+Requires-Python: <3.12,>=3.11
+Requires-Dist: bsdiff4<2.0,>=1.2.0
+Requires-Dist: pydantic>=2.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: tenacity
+Requires-Dist: pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v1.0.0
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Provides-Extra: signing
+Requires-Dist: pet-quantize>=1.0.0; extra == "signing"
