@@ -1,0 +1,25 @@
+release:
+  canary_percentage: 5
+  canary_observe_hours: 48
+  rollback_timeout_minutes: 5
+  failure_rate_threshold: 0.10
+
+gate_overrides:
+  eval_passed: true
+  dpo_pairs: 600
+  days_since_last_release: 10
+  open_p0_bugs: 0
+  canary_group_ready: true
+
+packaging:
+  delta_enabled: true
+  artifact_store_dir: "artifacts/store"
+  public_key_path: ""
+
+monitoring:
+  poll_interval_seconds: 30
+  device_pending_timeout_minutes: 30
+
+device_groups:
+  canary: "device_groups/canary.json"
+  production: "device_groups/production.json"
