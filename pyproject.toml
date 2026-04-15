@@ -42,7 +42,7 @@ strict = true
 warn_return_any = true
 
 [[tool.mypy.overrides]]
-module = ["bsdiff4", "pet_quantize.*"]
+module = ["bsdiff4", "pet_quantize.*", "yaml"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
