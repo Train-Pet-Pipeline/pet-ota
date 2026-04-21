@@ -1,15 +1,11 @@
-name: CI
+name: peer-dep-smoke
 
 on:
-  push:
-    branches: [dev, main]
   pull_request:
     branches: [dev, main]
-  repository_dispatch:
-    types: [schema-updated]
 
 jobs:
-  lint-and-test:
+  install-order-smoke:
     runs-on: ubuntu-latest
     env:
       PET_ALLOW_MISSING_SDK: "1"
@@ -36,8 +32,21 @@ jobs:
       - name: Step 4 — assert peer-dep version (§11.4)
         run: python -c "import pet_infra; assert pet_infra.__version__.startswith('2.'), f'unexpected pet_infra version {pet_infra.__version__}'"
 
-      - name: Lint
-        run: ruff check src/ tests/ && mypy src/
+      - name: Smoke — register_all populates OTA registry
+        run: |
+          python -c "
+          from pet_ota.plugins._register import register_all
+          register_all()
+          from pet_infra.registry import OTA
+          got = set(OTA.module_dict.keys())
+          assert 'local_backend' in got, f'local_backend missing; got OTA: {got}'
+          print(f'OK OTA registered: {sorted(got)}')"
 
-      - name: Test
-        run: pytest tests/ -v --tb=short
+      - name: Smoke — pet_ota entry-point discoverable
+        run: |
+          python -c "
+          from importlib.metadata import entry_points
+          eps = entry_points(group='pet_infra.plugins')
+          names = {ep.name for ep in eps}
+          assert 'pet_ota' in names, f'pet_ota entry-point missing; got: {names}'
+          print(f'OK pet_ota entry-point discoverable via pet_infra.plugins')"
