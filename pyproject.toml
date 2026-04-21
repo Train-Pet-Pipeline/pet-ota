@@ -11,7 +11,7 @@ dependencies = [
     "pydantic>=2.0",
     "pyyaml>=6.0",
     "tenacity",
-    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v1.0.0",
+    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.4.0-rc1",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +24,9 @@ dev = [
 signing = [
     "pet-quantize>=1.0.0",
 ]
+
+[project.entry-points."pet_infra.plugins"]
+pet_ota = "pet_ota.plugins._register:register_all"
 
 [tool.setuptools.packages.find]
 where = ["src"]
