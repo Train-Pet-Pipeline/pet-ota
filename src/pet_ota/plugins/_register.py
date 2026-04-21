@@ -20,5 +20,4 @@ def register_all() -> None:
             "pet-ota v2 requires pet-infra. Install via matrix row 2026.08."
         ) from e
 
-    # Plugins arrive in P4-C (LocalBackendPlugin). This skeleton deliberately
-    # registers nothing so the entry-point wiring can be validated in isolation.
+    from pet_ota.plugins.backends import local  # noqa: F401  triggers @OTA.register_module
