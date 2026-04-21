@@ -78,3 +78,23 @@ def test_registered_in_ota_registry() -> None:
     from pet_ota.plugins.backends import local  # noqa: F401  trigger registration
 
     assert "local_backend" in OTA.module_dict
+
+
+def test_fail_fast_when_edge_artifact_missing(tmp_path: Path) -> None:
+    """Missing source artifact file raises FileNotFoundError (no silent skip)."""
+    from pet_ota.plugins.backends.local import LocalBackendPlugin
+
+    missing = tmp_path / "not-there.rknn"
+    edge = EdgeArtifact(
+        format="rknn",
+        target_hardware=["rk3576"],
+        artifact_uri=str(missing),
+        sha256="c" * 64,
+        size_bytes=0,
+        input_shape={"pixel_values": [1, 3, 448, 448]},
+    )
+    card = ModelCard(**_base_card_kwargs(), edge_artifacts=[edge])
+
+    plugin = LocalBackendPlugin(storage_root=str(tmp_path / "ota"))
+    with pytest.raises(FileNotFoundError, match="edge artifact missing"):
+        plugin.run(card, recipe=MagicMock())

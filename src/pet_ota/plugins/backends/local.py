@@ -42,10 +42,14 @@ class LocalBackendPlugin:
 
         for edge in input_card.edge_artifacts:
             src = Path(edge.artifact_uri)
-            if src.exists():
-                shutil.copy2(src, storage / src.name)
+            if not src.exists():
+                raise FileNotFoundError(
+                    f"LocalBackendPlugin: edge artifact missing at {src} "
+                    f"(card.id={input_card.id!r}); refusing to deploy partial manifest"
+                )
+            shutil.copy2(src, storage / src.name)
 
-        manifest_path = storage / "manifest.json"
+        manifest_path = (storage / "manifest.json").resolve()
         manifest = input_card.to_manifest_entry()
         manifest_path.write_text(json.dumps(manifest, indent=2, default=str))
 
