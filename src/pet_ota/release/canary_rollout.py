@@ -12,7 +12,6 @@ from pet_ota.backend.base import OTABackend
 from pet_ota.backend.local import LocalBackend
 from pet_ota.monitoring.alert import check_and_alert
 from pet_ota.monitoring.check_update_rate import check_update_rate
-from pet_ota.packaging.create_deployment import create_deployment
 from pet_ota.packaging.upload_artifact import upload_artifact
 from pet_ota.release.check_gate import check_gate
 from pet_ota.release.rollback import rollback
@@ -103,9 +102,14 @@ def canary_rollout(
 
     # --- CANARY_DEPLOYING ---
     logger.info("rollout_state", extra={"state": "canary_deploying", "version": version})
-    canary_dep_id = create_deployment(
-        artifact_id=artifact_id, device_group="canary",
-        name=canary_dep_id, backend=backend,
+    canary_dep_id = backend.create_deployment(artifact_id, "canary", canary_dep_id)
+    logger.info(
+        "deployment_requested",
+        extra={
+            "deployment_id": canary_dep_id,
+            "artifact_id": artifact_id,
+            "device_group": "canary",
+        },
     )
 
     if device_simulator:
@@ -183,9 +187,14 @@ def _full_deploy_and_finish(
         backend.get_deployment_status(full_dep_id)
     except FileNotFoundError:
         artifact_id = version
-        full_dep_id = create_deployment(
-            artifact_id=artifact_id, device_group="production",
-            name=full_dep_id, backend=backend,
+        full_dep_id = backend.create_deployment(artifact_id, "production", full_dep_id)
+        logger.info(
+            "deployment_requested",
+            extra={
+                "deployment_id": full_dep_id,
+                "artifact_id": artifact_id,
+                "device_group": "production",
+            },
         )
     backend.update_deployment_status(full_dep_id, "full_deploying")
 
