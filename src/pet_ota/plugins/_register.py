@@ -1,8 +1,7 @@
 """Entry-point target for pet-infra's plugin discovery.
 
 Imports pet-ota plugin modules to trigger @OTA.register_module side-effects.
-v2.0.0 ships LocalBackendPlugin in P4-C; this skeleton lands first so the
-entry-point wiring is proven independently.
+Phase 4 ships all three OTA backends: local, s3, and http.
 """
 from __future__ import annotations
 
@@ -20,4 +19,8 @@ def register_all() -> None:
             "pet-ota v2 requires pet-infra. Install via matrix row 2026.08."
         ) from e
 
-    from pet_ota.plugins.backends import local  # noqa: F401  triggers @OTA.register_module
+    from pet_ota.plugins.backends import (
+        http,  # noqa: F401  triggers @OTA.register_module
+        local,  # noqa: F401  triggers @OTA.register_module
+        s3,  # noqa: F401  triggers @OTA.register_module
+    )
