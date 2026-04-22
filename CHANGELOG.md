@@ -4,9 +4,9 @@ All notable changes to pet-ota are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 2.1.0-rc1 — 2026-04-22
+## 2.1.0 — 2026-04-22
 
-Phase 4 W1 (OTA backends slice). Release candidate for pet-ota 2.1.0.
+Phase 4 W1 (OTA backends slice).
 
 ### Added
 - `S3BackendPlugin` (P2-A-2) — uploads edge artifacts + manifest.json to

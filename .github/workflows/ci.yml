@@ -24,8 +24,8 @@ jobs:
       - name: Configure git for private repos
         run: git config --global url."https://x-access-token:${{ secrets.CROSS_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
-      - name: Step 1 — install pet-infra (peer-dep, Phase 4 v2.5.0-rc1)
-        run: pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.5.0-rc1'
+      - name: Step 1 — install pet-infra (peer-dep, Phase 4 v2.5.0)
+        run: pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.5.0'
 
       - name: Step 2 — install pet-ota editable, no-deps
         run: pip install -e . --no-deps

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pet-ota"
-version = "2.1.0-rc1"
+version = "2.1.0"
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "bsdiff4>=1.2.0,<2.0",
@@ -12,7 +12,7 @@ dependencies = [
     "pyyaml>=6.0",
     "requests>=2.31",
     "tenacity",
-    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.5.0-rc1",
+    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.5.0",
 ]
 
 [project.optional-dependencies]
