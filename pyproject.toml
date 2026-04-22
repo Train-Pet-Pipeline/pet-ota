@@ -20,6 +20,8 @@ dev = [
     "pytest-cov",
     "ruff",
     "mypy",
+    "boto3>=1.34",
+    "moto[s3]>=5.0",
 ]
 signing = [
     "pet-quantize>=1.0.0",
