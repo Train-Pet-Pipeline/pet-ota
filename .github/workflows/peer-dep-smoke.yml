@@ -32,15 +32,17 @@ jobs:
       - name: Step 4 — assert peer-dep version (§11.4)
         run: python -c "import importlib.metadata; v=importlib.metadata.version('pet-infra'); assert v.startswith('2.5'), f'unexpected pet_infra version {v}'"
 
-      - name: Smoke — register_all populates OTA registry
+      - name: Smoke — register_all populates OTA registry (3 backends)
         run: |
           python -c "
           from pet_ota.plugins._register import register_all
           register_all()
           from pet_infra.registry import OTA
           got = set(OTA.module_dict.keys())
-          assert 'local_backend' in got, f'local_backend missing; got OTA: {got}'
-          print(f'OK OTA registered: {sorted(got)}')"
+          expected = {'local_backend', 's3_backend', 'http_backend'}
+          missing = expected - got
+          assert not missing, f'OTA backends missing: {missing}; got: {sorted(got)}'
+          print(f'OK 3 backends registered: {sorted(expected)}')"
 
       - name: Smoke — pet_ota entry-point discoverable
         run: |
