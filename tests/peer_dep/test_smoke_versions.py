@@ -4,16 +4,22 @@ shared STORAGE registry."""
 
 
 def test_pet_infra_version() -> None:
-    """pet-infra package resolves to a Phase-4-era version (>= 2.5).
+    """pet-infra package resolves to a v2 release.
 
     Uses importlib.metadata so the check reflects the installed package
     version from pyproject.toml rather than the __version__ attribute in
     __init__.py (which may lag a patch cycle).
+
+    The precise matrix row is pinned by the CI workflows
+    (.github/workflows/{ci,peer-dep-smoke}.yml step-4 asserts the current
+    minor series). This test intentionally stays broad to major-2 so
+    non-CI dev environments can run it without requiring an exact matrix
+    row reinstall on every bump.
     """
     import importlib.metadata
 
     version = importlib.metadata.version("pet-infra")
-    assert version.startswith("2.5"), version
+    assert version.startswith("2."), version
 
 
 def test_storage_registry_has_phase4_backends() -> None:
