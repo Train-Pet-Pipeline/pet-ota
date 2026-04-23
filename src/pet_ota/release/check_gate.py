@@ -11,10 +11,10 @@ logger = get_logger("pet-ota")
 def check_gate(params_path: str = "params.yaml") -> tuple[bool, list[str]]:
     """Run 5 release gate checks from gate_overrides in params.yaml.
 
-    Checks:
+    Checks (thresholds read from ``release.min_*`` in params.yaml):
       1. eval_passed must be True
-      2. dpo_pairs must be >= 500
-      3. days_since_last_release must be >= 7
+      2. dpo_pairs must be >= release.min_dpo_pairs (default 500)
+      3. days_since_last_release must be >= release.min_days_since_last_release (default 7)
       4. open_p0_bugs must be == 0
       5. canary_group_ready must be True
 
@@ -27,17 +27,21 @@ def check_gate(params_path: str = "params.yaml") -> tuple[bool, list[str]]:
     """
     params = load_params(params_path)
     g = params.gate_overrides
+    r = params.release
     failures: list[str] = []
 
     if not g.eval_passed:
         failures.append("eval_passed: evaluation did not pass")
 
-    if g.dpo_pairs < 500:
-        failures.append(f"dpo_pairs: {g.dpo_pairs} < 500 required")
-
-    if g.days_since_last_release < 7:
+    if g.dpo_pairs < r.min_dpo_pairs:
         failures.append(
-            f"days_since_last_release: {g.days_since_last_release} < 7 required"
+            f"dpo_pairs: {g.dpo_pairs} < {r.min_dpo_pairs} required"
+        )
+
+    if g.days_since_last_release < r.min_days_since_last_release:
+        failures.append(
+            f"days_since_last_release: {g.days_since_last_release} < "
+            f"{r.min_days_since_last_release} required"
         )
 
     if g.open_p0_bugs != 0:
