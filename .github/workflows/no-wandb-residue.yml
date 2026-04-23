@@ -1,0 +1,39 @@
+name: no-wandb-residue
+
+# Positive-list CI guard: scans only the live runtime surface for W&B residue.
+#
+# Why positive-list instead of exclusion-list:
+#   Historical docs may still mention "wandb" in legitimate context.
+#   Maintaining an exclusion list is fragile — positive-list only what
+#   SHOULD be clean. ClearML (orchestrator P0-B/C) is the sole experiment
+#   tracker.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for wandb references in live first-party code and active docs
+        run: |
+          set -e
+
+          # Positive-list scan: only first-party code / config.
+          # Exclude this guard workflow itself (it necessarily contains the pattern).
+          MATCHES=$(grep -rEn '\bwandb\b' \
+            --include='*.py' --include='*.yaml' --include='*.yml' \
+            --include='*.toml' --include='*.sh' \
+            --exclude='no-wandb-residue.yml' \
+            src/ tests/ .github/ params.yaml 2>/dev/null || true)
+
+          if [ -n "$MATCHES" ]; then
+            echo "::error::W&B residue found in live first-party code. Remove it and use ClearML instead."
+            echo "$MATCHES"
+            exit 1
+          fi
+
+          echo "Clean — no W&B residue detected in live first-party surface."

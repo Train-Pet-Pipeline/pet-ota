@@ -24,6 +24,8 @@ def sample_params() -> dict[str, Any]:
             "canary_observe_hours": 0,
             "rollback_timeout_minutes": 5,
             "failure_rate_threshold": 0.10,
+            "min_dpo_pairs": 500,
+            "min_days_since_last_release": 7,
         },
         "gate_overrides": {
             "eval_passed": True,
