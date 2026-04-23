@@ -28,7 +28,13 @@ dev = [
     "moto[s3]>=5.0",
 ]
 signing = [
-    "pet-quantize>=1.0.0",
+    # No pin: pet-quantize is a cross-repo runtime dep resolved by the
+    # matrix row; the `[signing]` extra is an optional soft-fail path
+    # (packaging/upload_artifact.py degrades to warn-and-continue when
+    # pet_quantize.packaging.verify_package is not importable). Keeps
+    # pet-ota in step with pet-eval's cross-repo plugin-dep style
+    # (spec §5.1 #2).
+    "pet-quantize",
 ]
 
 [project.entry-points."pet_infra.plugins"]
