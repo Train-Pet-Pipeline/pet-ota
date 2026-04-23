@@ -24,8 +24,8 @@ jobs:
       - name: Configure git for private repos
         run: git config --global url."https://x-access-token:${{ secrets.CROSS_REPO_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
-      - name: Step 1 — install pet-infra (peer-dep, Phase 4 v2.5.0)
-        run: pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.5.0'
+      - name: Step 1 — install pet-infra (peer-dep, matrix 2026.09)
+        run: pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.6.0'
 
       - name: Step 2 — install pet-ota editable, no-deps
         run: pip install -e . --no-deps
@@ -34,7 +34,7 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Step 4 — assert peer-dep version (§11.4)
-        run: python -c "import importlib.metadata; v=importlib.metadata.version('pet-infra'); assert v.startswith('2.5'), f'unexpected pet_infra version {v}'"
+        run: python -c "import importlib.metadata; v=importlib.metadata.version('pet-infra'); assert v.startswith('2.6'), f'unexpected pet_infra version {v}'"
 
       - name: Lint
         run: ruff check src/ tests/ && mypy src/
