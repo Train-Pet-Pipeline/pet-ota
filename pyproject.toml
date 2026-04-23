@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pet-ota"
-version = "2.1.0"
+version = "2.2.0"
 requires-python = ">=3.11,<3.12"
 license = {text = "BUSL-1.1"}
 dependencies = [
@@ -13,7 +13,9 @@ dependencies = [
     "pyyaml>=6.0",
     "requests>=2.31",
     "tenacity",
-    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.5.0",
+    # pet-infra is a β peer-dep (install order enforced by CI + README
+    # Prerequisites, not by pyproject resolution). See DEV_GUIDE §11.1.
+    # Same option-X delayed-guard pattern adopted by pet-quantize Phase 7.
 ]
 
 [project.optional-dependencies]
@@ -26,7 +28,13 @@ dev = [
     "moto[s3]>=5.0",
 ]
 signing = [
-    "pet-quantize>=1.0.0",
+    # No pin: pet-quantize is a cross-repo runtime dep resolved by the
+    # matrix row; the `[signing]` extra is an optional soft-fail path
+    # (packaging/upload_artifact.py degrades to warn-and-continue when
+    # pet_quantize.packaging.verify_package is not importable). Keeps
+    # pet-ota in step with pet-eval's cross-repo plugin-dep style
+    # (spec §5.1 #2).
+    "pet-quantize",
 ]
 
 [project.entry-points."pet_infra.plugins"]

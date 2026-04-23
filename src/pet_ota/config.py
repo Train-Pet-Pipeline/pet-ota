@@ -18,6 +18,10 @@ class ReleaseConfig(BaseModel):
     canary_observe_hours: int = 48
     rollback_timeout_minutes: int = 5
     failure_rate_threshold: float = 0.10
+    # Gate check thresholds (no-hardcode rule — previously literal in
+    # release/check_gate.py). Defaults match the historical hardcoded values.
+    min_dpo_pairs: int = 500
+    min_days_since_last_release: int = 7
 
 
 class GateOverrides(BaseModel):
