@@ -13,7 +13,9 @@ dependencies = [
     "pyyaml>=6.0",
     "requests>=2.31",
     "tenacity",
-    "pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra.git@v2.5.0",
+    # pet-infra is a β peer-dep (install order enforced by CI + README
+    # Prerequisites, not by pyproject resolution). See DEV_GUIDE §11.1.
+    # Same option-X delayed-guard pattern adopted by pet-quantize Phase 7.
 ]
 
 [project.optional-dependencies]
