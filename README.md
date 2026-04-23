@@ -4,17 +4,20 @@ OTA delta-update packaging, canary rollout, and rollback for the Train-Pet-Pipel
 
 ## Prerequisites
 
-pet-ota is a peer-dep consumer: **pet-infra must be installed first** from the current matrix row in `pet-infra/docs/compatibility_matrix.yaml`. Optional `[signing]` extras add pet-quantize so `upload_artifact` can verify package signatures; signing is a soft path — a missing pet-quantize degrades to a warning, not a hard fail.
+pet-ota is a peer-dep consumer: **pet-schema and pet-infra must be installed first** from the current matrix row in `pet-infra/docs/compatibility_matrix.yaml`. `pet_ota.plugins.backends.*` imports `pet_schema.model_card.ModelCard` and `pet_schema.recipe.ExperimentRecipe` at runtime — pet-schema is NOT in `pyproject.dependencies` (β peer-dep style), so a fresh `pip install pet-ota` without the explicit pet-schema pre-install leaves those imports dangling and mypy reports them as unresolved. Optional `[signing]` extras add pet-quantize so `upload_artifact` can verify package signatures; signing is a soft path — a missing pet-quantize degrades to a warning, not a hard fail.
 
 For local dev in the shared `pet-pipeline` conda env:
 
 ```bash
 conda activate pet-pipeline
 
-# 1. Install pet-infra peer-dep (current matrix row)
+# 1. Install pet-schema peer-dep (current matrix row)
+pip install 'pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema@v3.2.1'
+
+# 2. Install pet-infra peer-dep (current matrix row)
 pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.6.0'
 
-# 2. Editable install
+# 3. Editable install
 make setup   # → pip install -e ".[dev]"
 make test    # → PET_ALLOW_MISSING_SDK=1 pytest tests/ -v
 make lint    # → ruff check src/ tests/ && mypy src/
