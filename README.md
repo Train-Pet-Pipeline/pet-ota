@@ -12,10 +12,10 @@ For local dev in the shared `pet-pipeline` conda env:
 conda activate pet-pipeline
 
 # 1. Install pet-schema peer-dep (current matrix row)
-pip install 'pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema@v3.2.1'
+pip install 'pet-schema @ git+https://github.com/Train-Pet-Pipeline/pet-schema@v3.3.0'
 
 # 2. Install pet-infra peer-dep (current matrix row)
-pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.6.0'
+pip install 'pet-infra @ git+https://github.com/Train-Pet-Pipeline/pet-infra@v2.9.5'
 
 # 3. Editable install
 make setup   # → pip install -e ".[dev]"
